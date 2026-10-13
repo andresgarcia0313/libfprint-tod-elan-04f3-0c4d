@@ -23,6 +23,27 @@ Es la capa de protocolo portada a C desde la referencia en Python, más un compa
 - Medido en el lector real (25 toques de un dedo y 10 de otro): el otro dedo nunca pasó de 3 coincidencias;
   el dedo propio fue aceptado en 9 de 13 toques nuevos. Un toque rechazado se repite, como en un celular.
 
+English: [README.en.md](README.en.md).
+
+## Instalar (Ubuntu 26.04 y Kubuntu)
+
+1. Descargar `libfprint-2-tod1-elan0c4d_<versión>_amd64.deb` de la sección Releases.
+2. Instalarlo: `sudo apt install ./libfprint-2-tod1-elan0c4d_*_amd64.deb`
+3. Comprobar: `fprintd-list $USER` debe nombrar "ELAN 04f3:0c4d (rev 0x2410)".
+4. Registrar el dedo: Preferencias del sistema → Usuarios → "Configurar la autenticación por huella
+   dactilar…" → Añadir (en GNOME: Configuración → Usuarios → Inicio de sesión con huella).
+5. El bloqueo de pantalla de KDE ya acepta la huella. Para `sudo` y las ventanas de administrador, opcional:
+
+       sudo install -m 0755 packaging/pam/fprint-gate /usr/local/lib/fprint-gate
+       sudo install -m 0644 packaging/pam/fprintd-elan0c4d /usr/share/pam-configs/
+       sudo pam-auth-update --enable fprintd-elan0c4d
+
+   El filtro `fprint-gate` no pide huella a `sudo` sin terminal (guiones que pasan la contraseña por
+   tubería) ni en SDDM. La contraseña siempre sigue sirviendo. Quitar: `sudo pam-auth-update --remove
+   fprintd-elan0c4d` y `sudo apt remove libfprint-2-tod1-elan0c4d`.
+
+Las huellas registradas con el driver `elan` de fábrica no sirven con este: hay que registrarlas de nuevo.
+
 ## Compilar y probar
 
     sudo apt install libfprint-2-tod-dev libopencv-dev
@@ -30,8 +51,8 @@ Es la capa de protocolo portada a C desde la referencia en Python, más un compa
     ninja -C build
     meson test -C build
 
-No instala nada. Para instalar, copiar `build/libelan0c4d-tod.so` al directorio de módulos TOD
-(`FP_TOD_DRIVERS_DIR` o el de la distribución) y reiniciar fprintd.
+El paquete se genera con `packaging/build-deb.sh` (compila en modo release, pasa las pruebas y calcula las
+dependencias). Para probar sin instalar: `FP_TOD_DRIVERS_DIR=<carpeta con el .so>`.
 
 ## Qué hace
 
@@ -100,8 +121,7 @@ equipo; esos toques nunca entran al repositorio.
   con toques verificados.
 - Calibrar en el lector real el umbral de parecido entre toques (`ELAN_ENROLL_SIMILAR_MAX`, hoy 0,9): el log
   `touch for stage N` muestra la cobertura y el parecido de cada toque.
-- Licencia: LGPL-2.1-or-later (identificador SPDX en cada fichero; el texto está en
-  `/usr/share/common-licenses/LGPL-2.1`).
+- Licencia: LGPL-2.1-or-later (identificador SPDX en cada fichero; texto completo en `LICENSE`).
 
 ## Control de Cambios
 
@@ -109,4 +129,4 @@ equipo; esos toques nunca entran al repositorio.
 |---|---|---|
 | 0.1.0 | 2026-10-12 | Primera versión: protocolo, captura, recuperación, clasificador y pruebas |
 | 0.2.0 | 2026-10-13 | Enroll de 12 toques con progreso, reintentos y espera de levantar; print versionado |
-| 0.3.0 | 2026-10-13 | Comparador SIFT y RANSAC con OpenCV; plantilla sin imágenes; medido en el lector real |
+| 0.3.0 | 2026-10-13 | Comparador SIFT y RANSAC con OpenCV; plantilla sin imágenes; medido en el lector real; paquete .deb y perfil PAM |
