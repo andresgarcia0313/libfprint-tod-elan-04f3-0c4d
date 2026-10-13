@@ -54,6 +54,7 @@ test_invalid_frames_recalibrate_then_reinitialize (void)
   g_assert_no_error (error);
   g_assert_cmpstr (s.wire->str, ==,
                    W_PREPARE " 0009 " W_CAL " 0009 " W_INIT " " W_CAL " 0009");
+  g_assert_cmpuint (sim_warnings (), ==, 0);  /* a recovered frame is not worth a journal warning */
   sim_end (dev);
 }
 

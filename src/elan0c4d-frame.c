@@ -29,7 +29,9 @@ frame_handler (FpiSsm *ssm, FpDevice *dev)
       fpi_ssm_next_state (ssm);
       break;
 
-    case FRAME_CHECK:
+    case FRAME_CHECK:  /* recovering is routine (seen every few touches); failing to is not */
+      if (a->kind == ELAN_FRAME_INVALID && *remedies >= 2)
+        g_warning ("frame still invalid (mean %.0f) after recalibrating and reinitializing", a->mean);
       if (a->kind != ELAN_FRAME_INVALID || *remedies >= 2)
         fpi_ssm_mark_completed (ssm);
       else
@@ -37,7 +39,7 @@ frame_handler (FpiSsm *ssm, FpDevice *dev)
       break;
 
     case FRAME_REMEDY:
-      g_warning ("invalid frame (mean %.0f): %s", a->mean, *remedies == 0 ? "recalibrating" : "reinitializing");
+      g_info ("invalid frame (mean %.0f): %s", a->mean, *remedies == 0 ? "recalibrating" : "reinitializing");
       fpi_ssm_start_subsm (ssm, *remedies == 0 ?
                            elan_retry_ssm_new (dev, "recalibrate", elan_calibrate_ssm_new, NULL, TRUE) :
                            elan_retry_ssm_new (dev, "reinitialize", elan_reinit_ssm_new, NULL, TRUE));
