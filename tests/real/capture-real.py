@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: LGPL-2.1-or-later
-"""Manual check against the real sensor: open, N captures through enroll, close.
+"""Manual check against the real sensor: one full enroll as fprintd/KDE run it.
 
-With the comparator stub every enroll ends in NOT_SUPPORTED right after a usable
-frame, so that error means "captured". The driver waits until cancelled, like under
-fprintd, so each touch is cancelled after limit_s. No image is stored.
-Usage: FP_TOD_DRIVERS_DIR=<dir with the .so> G_MESSAGES_DEBUG=all capture-real.py [touches] [pause_s] [limit_s]
+Prints every stage and every retry. While the comparator is the stub the enroll
+ends in NOT_SUPPORTED after the last stage, which here means "all touches
+captured". The driver waits until cancelled, like under fprintd, so the whole
+enroll is cancelled after limit_s. No image is stored.
+Usage: FP_TOD_DRIVERS_DIR=<dir with the .so> G_MESSAGES_DEBUG=all capture-real.py [limit_s]
 """
 import sys
 import time
@@ -15,32 +16,37 @@ import gi
 gi.require_version("FPrint", "2.0")
 from gi.repository import FPrint, Gio, GLib  # noqa: E402
 
-DEVICE_ERRORS = FPrint.DeviceError.quark()
+STARTED = time.monotonic()
 
 
-def capture(dev, n, limit_s):
-    """One enroll attempt cancelled after limit_s; returns a short verdict instead of raising."""
-    started = time.monotonic()
+def progress(_dev, stage, _print, _data, error):
+    """Called by libfprint after each accepted touch or retry."""
+    when = time.monotonic() - STARTED
+    if error:
+        print(f"RESULT retry at {when:.1f}s: {error.message}", flush=True)
+    else:
+        print(f"RESULT stage {stage} accepted at {when:.1f}s", flush=True)
+
+
+def enroll(dev, limit_s):
+    """Run one enroll, cancelled after limit_s; return the verdict text."""
     cancellable = Gio.Cancellable()
     timer = GLib.timeout_add_seconds(limit_s, lambda: cancellable.cancel() or False)
     try:
-        dev.enroll_sync(FPrint.Print.new(dev), cancellable, None, None)
-        verdict = "enrolled (comparator is no longer the stub?)"
+        dev.enroll_sync(FPrint.Print.new(dev), cancellable, progress, None)
+        return "enrolled"
     except GLib.Error as exc:
-        if exc.matches(DEVICE_ERRORS, FPrint.DeviceError.NOT_SUPPORTED):
-            verdict = "captured"
-        elif exc.matches(Gio.io_error_quark(), Gio.IOErrorEnum.CANCELLED):
-            verdict = f"no finger within {limit_s}s (cancelled)"
-        else:
-            verdict = f"failed {exc.domain}:{exc.code} {exc.message}"
+        if exc.matches(FPrint.DeviceError.quark(), FPrint.DeviceError.NOT_SUPPORTED):
+            return "all touches captured (comparator still pending)"
+        if exc.matches(Gio.io_error_quark(), Gio.IOErrorEnum.CANCELLED):
+            return f"not finished within {limit_s}s (cancelled)"
+        return f"failed {exc.domain}:{exc.code} {exc.message}"
     finally:
         if not cancellable.is_cancelled():
             GLib.source_remove(timer)
-    print(f"RESULT touch {n}: {verdict} in {time.monotonic() - started:.1f}s", flush=True)
-    return verdict == "captured"
 
 
-def main(touches, pause_s, limit_s):
+def main(limit_s):
     ctx = FPrint.Context()
     ctx.enumerate()
     devices = [d for d in ctx.get_devices() if d.get_driver() == "elan0c4d-tod"]
@@ -53,11 +59,8 @@ def main(touches, pause_s, limit_s):
     except GLib.Error as exc:
         print(f"RESULT open failed: {exc.message}", flush=True)
         return 3
-    ok = 0
     try:
-        for n in range(1, touches + 1):
-            ok += capture(dev, n, limit_s)
-            time.sleep(pause_s)
+        print(f"RESULT {dev.get_nr_enroll_stages()} stages: {enroll(dev, limit_s)}", flush=True)
     except KeyboardInterrupt:
         print("RESULT cancelled", flush=True)
     finally:
@@ -65,11 +68,8 @@ def main(touches, pause_s, limit_s):
             dev.close_sync()
         except GLib.Error as exc:
             print(f"RESULT close failed: {exc.message}", flush=True)
-    print(f"RESULT {ok}/{touches} captures", flush=True)
-    return 0 if ok == touches else 1
+    return 0
 
 
 if __name__ == "__main__":
-    args = sys.argv[1:]
-    sys.exit(main(int(args[0]) if args else 5, float(args[1]) if len(args) > 1 else 2.0,
-                  int(args[2]) if len(args) > 2 else 30))
+    sys.exit(main(int(sys.argv[1]) if len(sys.argv) > 1 else 180))
