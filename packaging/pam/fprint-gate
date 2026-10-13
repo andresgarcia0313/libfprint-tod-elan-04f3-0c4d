@@ -1,0 +1,17 @@
+#!/bin/sh
+# Gate for pam_fprintd (pam_exec, /usr/share/pam-configs/fprintd-elan0c4d).
+# Exit 0 = SKIP the fingerprint, 1 = ask for it (pam_exec logs only the 1s,
+# so the frequent automatic case leaves nothing in the journal).
+# sudo or su without a terminal is a script or an agent piping the password:
+# asking for a finger there would stall it. SDDM is left out: KDE does not
+# support fingerprint login yet and this machine logs in automatically.
+# A person in a terminal and KDE's polkit dialogs get the fingerprint.
+case "$PAM_SERVICE" in
+  sddm) exit 0 ;;
+  sudo|sudo-i|su|su-l)
+    case "$PAM_TTY" in
+      /dev/pts/*|/dev/tty*|pts/*|tty*) exit 1 ;;
+      *) exit 0 ;;
+    esac ;;
+esac
+exit 1
