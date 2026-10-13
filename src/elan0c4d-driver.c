@@ -31,6 +31,7 @@ static void
 fpi_device_elan0c4d_init (FpiDeviceElan0c4d *self)
 {
   self->capture_timeout_ms = ELAN_CAPTURE_TIMEOUT_MS;
+  self->finger_window_ms = ELAN_FINGER_WINDOW_MS;
 }
 
 static void

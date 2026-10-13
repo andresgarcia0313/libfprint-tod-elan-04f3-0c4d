@@ -23,7 +23,8 @@ struct _FpiDeviceElan0c4d
   ElanAssessment assessment;           /* classification of `frame` */
   guint8         wait_code;            /* decisive code of the last wait */
   gint64         deadline_us;          /* end of the current capture attempt */
-  gint           capture_timeout_ms;   /* how long a capture waits for a usable finger */
+  gint           capture_timeout_ms;   /* 0 waits for a usable finger until cancelled */
+  gint           finger_window_ms;     /* length of each 40 3f wait without a deadline */
   gboolean       claimed;              /* interface 0 is held by us */
 };
 

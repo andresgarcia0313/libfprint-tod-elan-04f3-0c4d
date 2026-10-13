@@ -37,7 +37,8 @@
 #define ELAN_CALIBRATION_POLL_MS 10
 #define ELAN_RELEASE_WAIT_MS 1500
 #define ELAN_RESEND_MS 50
-#define ELAN_CAPTURE_TIMEOUT_MS 30000
+#define ELAN_CAPTURE_TIMEOUT_MS 0      /* 0: wait until fprintd cancels (libfprint contract) */
+#define ELAN_FINGER_WINDOW_MS 10000    /* one 40 3f slice when there is no deadline */
 #define ELAN_ATTEMPTS 3
 #define ELAN_BACKOFF_MS 500
 

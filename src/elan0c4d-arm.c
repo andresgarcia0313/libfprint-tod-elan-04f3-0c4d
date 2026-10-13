@@ -3,7 +3,8 @@
  * Arming the finger detector (elan_capture.py _arm): SSO on, wait for the
  * finger to be released (a timeout only means one is resting: the arm ends and
  * the caller reads the frame directly), LED, then wait for 0xAF/0x55 until
- * the capture deadline.
+ * the capture deadline. Without a deadline each slice that ends silent just
+ * re-arms: libfprint actions wait for the finger until fprintd cancels them.
  */
 #include "elan0c4d-ops.h"
 
@@ -19,6 +20,8 @@ static const ElanWait release_wait = { "wait-release", elan_cmd_wait_release, si
 gint64
 elan_capture_left_ms (const FpiDeviceElan0c4d *self)
 {
+  if (self->capture_timeout_ms <= 0)
+    return self->finger_window_ms;
   return (self->deadline_us - g_get_monotonic_time ()) / 1000;
 }
 
@@ -47,10 +50,12 @@ release_done (FpiSsm *ssm, GError *error)
 static void
 press_done (FpiSsm *ssm, GError *error)
 {
+  FpiDeviceElan0c4d *self = FPI_DEVICE_ELAN0C4D (fpi_ssm_get_device (ssm));
+
   if (error && elan_error_is_timeout (error))
     {
       g_error_free (error);
-      error = elan_no_finger_error (FPI_DEVICE_ELAN0C4D (fpi_ssm_get_device (ssm)));
+      error = self->capture_timeout_ms > 0 ? elan_no_finger_error (self) : NULL;
     }
   if (error)
     fpi_ssm_mark_failed (ssm, error);

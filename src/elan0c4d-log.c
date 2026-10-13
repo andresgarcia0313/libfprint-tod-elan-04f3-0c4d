@@ -18,6 +18,8 @@ elan_log_error (const char *what, const GError *error)
 {
   if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
     g_info ("%s: cancelled", what);
+  else if (elan_error_is_timeout (error))  /* expected while waiting; callers report real failures */
+    g_debug ("%s: %s", what, error->message);
   else
     g_warning ("%s: %s", what, error->message);
 }
