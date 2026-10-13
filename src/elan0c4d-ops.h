@@ -56,6 +56,7 @@ FpiSsm *elan_prepare_ssm_new (FpDevice *dev, gconstpointer arg);  /* prepare_cap
 FpiSsm *elan_frame_ssm_new (FpDevice *dev, gconstpointer arg);    /* read_frame */
 FpiSsm *elan_arm_ssm_new (FpDevice *dev, gconstpointer arg);      /* SSO, release wait, LED, press wait */
 FpiSsm *elan_capture_ssm_new (FpDevice *dev);
+FpiSsm *elan_lift_ssm_new (FpDevice *dev, gconstpointer arg);     /* frames until no finger is seen */
 
 /* Time left of the current capture attempt and the error raised when it runs out. */
 gint64  elan_capture_left_ms (const FpiDeviceElan0c4d *self);

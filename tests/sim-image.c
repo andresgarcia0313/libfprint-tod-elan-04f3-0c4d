@@ -16,8 +16,10 @@ sim_serve_image (FpiUsbTransfer *t)
 
   if (off == 0)
     {
-      if (kind == SIM_FINGER)
-        synth_ridges (px, ELAN_HEIGHT / 10);
+      if (kind == SIM_FINGER || kind == SIM_MOVED)
+        synth_ridges_at (px, ELAN_HEIGHT / 10, kind == SIM_MOVED ? 1 : 0);
+      else if (kind == SIM_PARTIAL)
+        synth_ridges (px, 11);
       else if (kind == SIM_EMPTY)
         synth_empty (px);
       else

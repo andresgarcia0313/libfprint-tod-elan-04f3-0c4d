@@ -25,12 +25,18 @@ synth_empty (guint16 *px)
 }
 
 void
-synth_ridges (guint16 *px, guint block_rows)
+synth_ridges_at (guint16 *px, guint block_rows, guint shift)
 {
   static const guint16 crest[4] = { 0, 600, 1200, 600 };
 
   synth_empty (px);
   for (guint y = 0; y < block_rows * 10; y++)
     for (guint x = 0; x < ELAN_WIDTH; x++)
-      px[y * ELAN_WIDTH + x] = 2450 + crest[(x + y / 2) % 4];
+      px[y * ELAN_WIDTH + x] = 2450 + crest[(x + y / 2 + shift) % 4];
+}
+
+void
+synth_ridges (guint16 *px, guint block_rows)
+{
+  synth_ridges_at (px, block_rows, 0);
 }

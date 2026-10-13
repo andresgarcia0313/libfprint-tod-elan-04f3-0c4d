@@ -22,3 +22,9 @@ typedef struct
 ElanAssessment elan_quality_assess (const guint16 *px, guint width, guint height);
 
 const char *elan_frame_kind_name (ElanFrameKind kind);
+
+/* 8-bit image for storing and matching: column pattern removed, 1-99 % stretched (elan0c4d-normalize.c). */
+void elan_quality_normalize (const guint16 *px, guint width, guint height, guint8 *out);
+
+/* Pearson correlation of two n-pixel images, -1..1; 0 when one of them is flat. */
+gdouble elan_quality_similarity (const guint8 *a, const guint8 *b, gsize n);

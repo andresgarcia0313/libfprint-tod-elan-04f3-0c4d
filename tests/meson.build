@@ -3,19 +3,30 @@ test_env.set('G_DEBUG', 'fatal-warnings')
 inc = include_directories('../src')
 # The TOD library leaves fp_* to the host application; test programs have to provide them.
 test_deps = deps + [dependency('libfprint-2')]
+pure_deps = [dependency('glib-2.0'), m_dep]
 
 test('quality',
   executable('test-quality', 'test-quality.c', 'synth.c', pure_sources,
-    include_directories: inc, dependencies: dependency('glib-2.0')),
+    include_directories: inc, dependencies: pure_deps),
   env: test_env)
 
 test('guard',
   executable('test-guard', 'test-guard.c', pure_sources,
-    include_directories: inc, dependencies: dependency('glib-2.0')),
+    include_directories: inc, dependencies: pure_deps),
   env: test_env)
 
 test('errors',
   executable('test-errors', 'test-errors.c', '../src/elan0c4d-error.c', '../src/elan0c4d-match-stub.c',
+    include_directories: inc, dependencies: test_deps),
+  env: test_env)
+
+test('normalize',
+  executable('test-normalize', 'test-normalize.c', 'synth.c', pure_sources,
+    include_directories: inc, dependencies: pure_deps),
+  env: test_env)
+
+test('print',
+  executable('test-print', 'test-print.c', '../src/elan0c4d-print.c',
     include_directories: inc, dependencies: test_deps),
   env: test_env)
 
@@ -24,9 +35,10 @@ test('module',
   args: [driver.full_path()], env: test_env, depends: driver)
 
 # The real driver code against a scripted sensor: the executable provides fpi_usb_transfer_submit.
-sim_sources = files('sim-image.c', 'sim-run.c', 'sim-sensor.c', 'sim-transport.c', 'synth.c')
+sim_sources = files('sim-image.c', 'sim-progress.c', 'sim-run.c', 'sim-sensor.c', 'sim-touches.c',
+  'sim-transport.c', 'synth.c')
 sim_driver = driver_sources + sim_sources
-foreach name : ['open', 'capture', 'limits', 'stop']
+foreach name : ['open', 'capture', 'limits', 'stop', 'enroll', 'lift']
   test('sim-' + name,
     executable('test-sim-' + name, 'test-sim-' + name + '.c', sim_driver,
       include_directories: inc, dependencies: test_deps),

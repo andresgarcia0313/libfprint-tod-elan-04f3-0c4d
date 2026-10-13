@@ -12,3 +12,6 @@ void synth_empty (guint16 *px);
 
 /* Crests of period 4 (0, 600, 1200, 600) on the first `block_rows` rows of 10x10 blocks. */
 void synth_ridges (guint16 *px, guint block_rows);
+
+/* The same crests moved `shift` pixels sideways: another contact of the same finger. */
+void synth_ridges_at (guint16 *px, guint block_rows, guint shift);

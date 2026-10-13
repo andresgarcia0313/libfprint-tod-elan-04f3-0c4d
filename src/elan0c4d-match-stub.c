@@ -12,7 +12,7 @@ not_supported (GError **error, const char *what)
 }
 
 gboolean
-elan_match_enroll (const ElanFrame *frame, GBytes **tmpl, GError **error)
+elan_match_enroll (const ElanFrame *frames, guint n_frames, GBytes **tmpl, GError **error)
 {
   return not_supported (error, "enroll");
 }

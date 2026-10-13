@@ -21,6 +21,8 @@ sim_start (SimSensor *sensor)
 
   sim = sensor;
   sim->wire = g_string_new (NULL);
+  sim_progress = g_array_new (FALSE, FALSE, sizeof (SimProgress));
+  sim_completed = FALSE;
   sim_warning_count = 0;
   g_clear_object (&sim_cancellable);
   sim_cancellable = g_cancellable_new ();
@@ -68,6 +70,7 @@ sim_run (FpiSsm *ssm)
 static gboolean
 cancel_now (gpointer data)
 {
+  g_string_append (sim->wire, " [cancel]");  /* what the driver writes after it is visible */
   g_cancellable_cancel (sim_cancellable);
   return G_SOURCE_REMOVE;
 }
@@ -89,4 +92,6 @@ sim_end (FpiDeviceElan0c4d *device)
 {
   g_object_unref (device);
   g_string_free (sim->wire, TRUE);
+  g_clear_pointer (&sim_progress, g_array_unref);
+  g_clear_error (&sim_completion);
 }

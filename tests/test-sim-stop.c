@@ -15,7 +15,7 @@ test_cancel_aborts_the_wait (void)
   sim_cancel_in (150);
   error = sim_run (elan_capture_ssm_new (FP_DEVICE (dev)));
   g_assert_error (error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
-  g_assert_cmpstr (s.wire->str, ==, W_PREPARE " 0009 " W_SSO " 403e 4031 403f 000b");
+  g_assert_cmpstr (s.wire->str, ==, W_PREPARE " 0009 " W_SSO " 403e 4031 403f [cancel] 000b");
   sim_end (dev);
 }
 

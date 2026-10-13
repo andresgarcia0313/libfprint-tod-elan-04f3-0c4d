@@ -23,6 +23,7 @@ test_tod_entry_point (void)
   g_assert_cmpstr (cls->id, ==, "elan0c4d-tod");
   g_assert_cmpint (cls->type, ==, FP_DEVICE_TYPE_USB);
   g_assert_cmpint (cls->scan_type, ==, FP_SCAN_TYPE_PRESS);
+  g_assert_cmpint (cls->nr_enroll_stages, ==, 12);  /* fprintd shows the progress of each touch */
   g_assert_cmphex (cls->id_table[0].vid, ==, 0x04f3);
   g_assert_cmphex (cls->id_table[0].pid, ==, 0x0c4d);
   g_assert_cmpint (cls->id_table[1].pid, ==, 0);

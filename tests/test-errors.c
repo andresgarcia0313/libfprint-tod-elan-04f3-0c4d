@@ -53,15 +53,16 @@ static void
 test_match_stub (void)
 {
   guint16 px[4] = { 0 };
-  ElanFrame frame = { px, px, 2, 2 };
+  ElanFrame frames[2] = { { px, px, 2, 2 }, { px, px, 2, 2 } };
   g_autoptr(GBytes) tmpl = NULL;
   g_autoptr(GError) error = NULL;
   gboolean matched = TRUE;
 
-  g_assert_false (elan_match_enroll (&frame, &tmpl, &error));
+  g_assert_false (elan_match_enroll (frames, G_N_ELEMENTS (frames), &tmpl, &error));
   g_assert_error (error, FP_DEVICE_ERROR, FP_DEVICE_ERROR_NOT_SUPPORTED);
+  g_assert_null (tmpl);
   g_clear_error (&error);
-  g_assert_false (elan_match_verify (&frame, NULL, &matched, &error));
+  g_assert_false (elan_match_verify (&frames[0], NULL, &matched, &error));
   g_assert_error (error, FP_DEVICE_ERROR, FP_DEVICE_ERROR_NOT_SUPPORTED);
 }
 

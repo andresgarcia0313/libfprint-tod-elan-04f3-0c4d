@@ -7,8 +7,8 @@
 #include <gmodule.h>
 #include <gusb.h>
 #include "elan0c4d-actions.h"
+#include "elan0c4d-enroll.h"
 #include "elan0c4d-guard.h"
-#include "elan0c4d-ops.h"
 
 G_DEFINE_TYPE (FpiDeviceElan0c4d, fpi_device_elan0c4d, FP_TYPE_DEVICE)
 
@@ -35,16 +35,25 @@ fpi_device_elan0c4d_init (FpiDeviceElan0c4d *self)
 }
 
 static void
+fpi_device_elan0c4d_finalize (GObject *object)
+{
+  g_clear_pointer (&FPI_DEVICE_ELAN0C4D (object)->enrollment, g_free);
+  G_OBJECT_CLASS (fpi_device_elan0c4d_parent_class)->finalize (object);
+}
+
+static void
 fpi_device_elan0c4d_class_init (FpiDeviceElan0c4dClass *klass)
 {
   FpDeviceClass *cls = FP_DEVICE_CLASS (klass);
+
+  G_OBJECT_CLASS (klass)->finalize = fpi_device_elan0c4d_finalize;
 
   cls->id = "elan0c4d-tod";
   cls->full_name = "ELAN 04f3:0c4d (rev 0x2410)";
   cls->type = FP_DEVICE_TYPE_USB;
   cls->id_table = id_table;
   cls->scan_type = FP_SCAN_TYPE_PRESS;
-  cls->nr_enroll_stages = 1;
+  cls->nr_enroll_stages = ELAN_ENROLL_STAGES;
   cls->temp_hot_seconds = -1;
 
   cls->usb_discover = elan_usb_discover;

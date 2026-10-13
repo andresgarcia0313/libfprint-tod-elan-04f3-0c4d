@@ -10,6 +10,8 @@
 #define FPI_TYPE_DEVICE_ELAN0C4D (fpi_device_elan0c4d_get_type ())
 G_DECLARE_FINAL_TYPE (FpiDeviceElan0c4d, fpi_device_elan0c4d, FPI, DEVICE_ELAN0C4D, FpDevice)
 
+typedef struct _ElanEnrollment ElanEnrollment;  /* elan0c4d-enroll.h */
+
 /* Reserved to one operation at a time: libfprint serializes the actions of a device. */
 struct _FpiDeviceElan0c4d
 {
@@ -26,6 +28,7 @@ struct _FpiDeviceElan0c4d
   gint           capture_timeout_ms;   /* 0 waits for a usable finger until cancelled */
   gint           finger_window_ms;     /* length of each 40 3f wait without a deadline */
   gboolean       claimed;              /* interface 0 is held by us */
+  ElanEnrollment *enrollment;          /* stages of the running enroll, NULL otherwise */
 };
 
 /* Action entry points (elan0c4d-actions.c), installed as vfuncs by the class. */

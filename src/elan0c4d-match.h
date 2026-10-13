@@ -17,8 +17,12 @@ typedef struct
   guint          height;
 } ElanFrame;
 
-/* Builds the template stored in the print from one usable finger frame. */
-gboolean elan_match_enroll (const ElanFrame *frame, GBytes **tmpl, GError **error);
+/*
+ * Builds the template stored in the print from the n_frames touches the
+ * enroll accepted (ELAN_ENROLL_STAGES, each a different contact of the same
+ * finger). The print also keeps their 8-bit images (elan0c4d-print.c).
+ */
+gboolean elan_match_enroll (const ElanFrame *frames, guint n_frames, GBytes **tmpl, GError **error);
 
 /* Compares a usable finger frame with a stored template; *matched only if TRUE is returned. */
 gboolean elan_match_verify (const ElanFrame *frame, GBytes *tmpl, gboolean *matched, GError **error);
