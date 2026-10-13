@@ -7,8 +7,8 @@ Lenovo IdeaPad 5 14IAL7 (and possibly other 2022 Lenovo laptops). With stock lib
 
 This module talks to the sensor as an image device (match on host):
 
-- USB protocol reimplemented for interoperability from observed device behaviour; no vendor code,
-  firmware or keys are included. Commands `42 01` (RUNIAP) and `40 27` (WDTRST) are never sent and a
+- USB protocol reimplemented for interoperability after studying how the Windows driver drives the
+  sensor; no vendor code, firmware or keys are included. Commands `42 01` (RUNIAP) and `40 27` (WDTRST) are never sent and a
   test guards the sources against them.
 - Capture with recalibration and re-initialization when the analog front end returns zero or
   saturated frames, plus typed errors and retries; every step is logged in the `libfprint-elan0c4d`
@@ -41,7 +41,8 @@ The tests use a scripted sensor and synthetic surfaces (no biometric data) and a
 
 ## Status
 
-Works on the author's machine for enroll, lock screen and sudo. Not yet reviewed by libfprint
-upstream; feedback and testing on other 04f3:0c4d units are welcome.
+Enroll from KDE System Settings works on the author's machine; matching was measured on saved
+touches. Not yet reviewed by libfprint upstream; feedback and testing on other 04f3:0c4d units are
+welcome.
 
 License: LGPL-2.1-or-later.
