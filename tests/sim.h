@@ -41,6 +41,7 @@ typedef struct { gint stages; gint retry; } SimProgress;
 extern GArray *sim_progress;    /* SimProgress reported since sim_start */
 extern GError *sim_completion;  /* error of fpi_device_enroll_complete */
 extern gboolean sim_completed;  /* fpi_device_enroll_complete was called */
+extern FpPrint *sim_enrolled;   /* print the enroll filled in, NULL if it never asked for one */
 
 FpiDeviceElan0c4d *sim_start (SimSensor *sensor);  /* new headless device wired to `sensor` */
 GError *sim_run (FpiSsm *ssm);                     /* run to completion; the error or NULL */

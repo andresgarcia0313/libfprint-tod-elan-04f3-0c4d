@@ -15,3 +15,6 @@ void synth_ridges (guint16 *px, guint block_rows);
 
 /* The same crests moved `shift` pixels sideways: another contact of the same finger. */
 void synth_ridges_at (guint16 *px, guint block_rows, guint shift);
+
+/* Window of a smooth random surface (seed) seen from offset dx, dy (dx <= 44, dy <= 50). */
+void synth_texture (guint16 *px, guint32 seed, guint dx, guint dy);

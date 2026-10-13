@@ -1,9 +1,8 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
 /*
  * Enroll action: ELAN_ENROLL_STAGES touches (elan0c4d-stages.c), then the
- * comparator builds the template from all of them and the print keeps both
- * the template and the 8-bit stages. With the stub the action ends with
- * FP_DEVICE_ERROR_NOT_SUPPORTED after every stage was reported.
+ * comparator builds the template from all of them and the print keeps only
+ * that template (keypoints and descriptors, elan0c4d-print.c).
  */
 #include "elan0c4d-actions.h"
 #include "elan0c4d-enroll.h"

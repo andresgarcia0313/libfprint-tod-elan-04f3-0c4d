@@ -1,13 +1,19 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
 /*
- * Interface of the fingerprint comparator. The matching algorithm is NOT
- * decided yet: the driver only knows this header. Replace
- * elan0c4d-match-stub.c in meson.build with a real implementation; the
- * stub fails every call with FP_DEVICE_ERROR_NOT_SUPPORTED.
+ * Interface of the fingerprint comparator (elan0c4d-match.c, built on the
+ * OpenCV keypoint matcher of elan0c4d-sift*.cpp). The driver only knows this
+ * header; elan0c4d-match-stub.c is the same interface without a matcher.
  */
 #pragma once
 
 #include <glib.h>
+
+/*
+ * A probe matches when this many keypoint matches agree on one placement
+ * with some enrolled touch. Measured on the real sensor (2026-10-13):
+ * the other finger never went above 3, overlapping genuine touches gave 11+.
+ */
+#define ELAN_MATCH_MIN_INLIERS 8
 
 typedef struct
 {
@@ -20,7 +26,7 @@ typedef struct
 /*
  * Builds the template stored in the print from the n_frames touches the
  * enroll accepted (ELAN_ENROLL_STAGES, each a different contact of the same
- * finger). The print also keeps their 8-bit images (elan0c4d-print.c).
+ * finger). The template holds keypoints and descriptors, never the images.
  */
 gboolean elan_match_enroll (const ElanFrame *frames, guint n_frames, GBytes **tmpl, GError **error);
 

@@ -8,6 +8,16 @@
 GArray  *sim_progress;
 GError  *sim_completion;
 gboolean sim_completed;
+FpPrint *sim_enrolled;
+
+/* The print fprintd hands to an enroll; it stays alive until sim_end to be inspected. */
+void
+fpi_device_get_enroll_data (FpDevice *device, FpPrint **print)
+{
+  if (sim_enrolled == NULL)
+    sim_enrolled = g_object_ref_sink (fp_print_new (device));
+  *print = sim_enrolled;
+}
 
 void
 fpi_device_enroll_progress (FpDevice *device, gint completed_stages, FpPrint *print, GError *error)

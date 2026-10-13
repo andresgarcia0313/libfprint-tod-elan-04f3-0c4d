@@ -94,4 +94,5 @@ sim_end (FpiDeviceElan0c4d *device)
   g_string_free (sim->wire, TRUE);
   g_clear_pointer (&sim_progress, g_array_unref);
   g_clear_error (&sim_completion);
+  g_clear_object (&sim_enrolled);
 }

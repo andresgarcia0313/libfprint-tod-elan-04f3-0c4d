@@ -1,8 +1,7 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
 /*
  * Verify and identify capture one usable finger frame (elan0c4d-capture.c)
- * and then ask the comparator interface. With the stub they end with
- * FP_DEVICE_ERROR_NOT_SUPPORTED after a full, logged capture.
+ * and then ask the comparator (elan0c4d-match.c), which logs its score.
  */
 #include "elan0c4d-actions.h"
 #include "elan0c4d-ops.h"

@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
 /* Enroll in several touches against the simulated sensor: progress, retries and the comparator. */
 #include "sim.h"
+#include "elan0c4d-actions.h"
 #include "elan0c4d-enroll.h"
 
 #define LIFT " 0009"  /* one frame read while waiting for the lift: the finger is already gone */
@@ -61,7 +62,7 @@ test_partial_touch_is_retried (void)
   check_retry (SIM_PARTIAL, FP_DEVICE_RETRY_CENTER_FINGER);
 }
 
-/* The action hands every stage to the comparator; the stub refuses and the stages are freed. */
+/* The action hands every stage to the comparator, the print keeps its template and the stages are freed. */
 static void
 test_action_ends_in_the_comparator (void)
 {
@@ -69,14 +70,20 @@ test_action_ends_in_the_comparator (void)
   SimSensor s;
   FpiDeviceElan0c4d *dev;
   const GError *error;
+  g_autoptr(GError) load_error = NULL;
+  g_autoptr(GBytes) tmpl = NULL;
 
   for (guint i = 0; i < ELAN_ENROLL_STAGES; i++)
     touches[i] = i % 2 ? SIM_MOVED : SIM_FINGER;
   dev = sim_start_touches (&s, touches, ELAN_ENROLL_STAGES);
-  error = sim_run_enroll (dev);  /* g_assert_error evaluates its argument more than once */
-  g_assert_error (error, FP_DEVICE_ERROR, FP_DEVICE_ERROR_NOT_SUPPORTED);
+  error = sim_run_enroll (dev);
+  g_assert_no_error ((GError *) error);
   sim_assert_progress (ELAN_ENROLL_STAGES, G_MAXUINT, -1);
   g_assert_null (dev->enrollment);
+  g_assert_nonnull (sim_enrolled);
+  tmpl = elan_print_load (sim_enrolled, &load_error);
+  g_assert_no_error (load_error);
+  g_assert_cmpmem (g_bytes_get_data (tmpl, NULL), 4, "E0S1", 4);
   sim_end (dev);
 }
 
