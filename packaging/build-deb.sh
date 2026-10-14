@@ -27,7 +27,12 @@ needed="$(objdump -p "$so" | awk '/NEEDED/{print $2}')"
 depends="$(for lib in $needed; do ldconfig -p | awk -v l="$lib" '$1 == l && /x86-64/{print $NF; exit}'; done \
   | xargs -r -n1 readlink -f | xargs -r dpkg -S 2>/dev/null | cut -d: -f1 | sort -u \
   | grep -vxE 'libc6|libfprint-2-tod1' | paste -sd, | sed 's/,/, /g')"
-log "depende de: $depends"
+# Built and tested against this libfprint: apt keeps it back instead of loading the module into a
+# libfprint whose internals this code was never run with (same upstream series only).
+tod_ver="$(dpkg-query -W -f='${Version}' libfprint-2-tod1)"
+tod_min="${tod_ver%%-*}"
+tod_max="$(printf '%s' "$tod_min" | sed -E 's/^([0-9]+:)?([0-9]+)\.([0-9]+).*/\1\2.\3/' | awk -F. '{print $1"."$2+1"~"}')"
+log "depende de: $depends; libfprint-2-tod1 >= $tod_min y << $tod_max"
 
 mkdir -p "$stage/DEBIAN" "$stage/usr/share/doc/$pkg"
 cp "$root/README.md" "$stage/usr/share/doc/$pkg/"
@@ -36,7 +41,7 @@ Package: $pkg
 Version: $version
 Architecture: $arch
 Maintainer: Andres Garcia <andresgarcia0313@gmail.com>
-Depends: libfprint-2-tod1, $depends
+Depends: libfprint-2-tod1 (>= $tod_min), libfprint-2-tod1 (<< $tod_max), $depends
 Section: libs
 Priority: optional
 Description: libfprint TOD driver for the ELAN 04f3:0c4d fingerprint reader

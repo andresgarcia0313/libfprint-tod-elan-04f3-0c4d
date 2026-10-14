@@ -229,3 +229,4 @@ equipo; esos toques nunca entran al repositorio.
 | 0.1.0 | 2026-10-12 | Primera versión: protocolo, captura, recuperación, clasificador y pruebas |
 | 0.2.0 | 2026-10-13 | Enroll de 12 toques con progreso, reintentos y espera de levantar; print versionado |
 | 0.3.0 | 2026-10-13 | Comparador SIFT y RANSAC con OpenCV; plantilla sin imágenes; medido en el lector real; paquete .deb y perfil PAM; README bilingüe (inglés y español) |
+| 0.3.1 | 2026-10-13 | El resultado de cada toque queda en el journal (puntaje, nunca la imagen); el paquete fija la serie de libfprint con la que se probó |

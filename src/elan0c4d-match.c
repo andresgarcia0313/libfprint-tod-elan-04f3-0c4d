@@ -2,6 +2,8 @@
 /*
  * The comparator the driver calls: 8-bit images (elan_quality_normalize) go
  * to the OpenCV matcher and its statuses become libfprint errors.
+ * Each result is a g_message, so it reaches the journal without debug: one
+ * line per touch with its score, never the image.
  */
 #include "fpi-device.h"
 #include "elan0c4d-match.h"
@@ -50,7 +52,7 @@ elan_match_enroll (const ElanFrame *frames, guint n_frames, GBytes **tmpl, GErro
                              frames[0].height, tmpl, &message);
   if (!check (status, message, error))
     return FALSE;
-  g_info ("enroll: template of %u touches, %zu bytes", n_frames, g_bytes_get_size (*tmpl));
+  g_message ("enroll: template of %u touches, %zu bytes", n_frames, g_bytes_get_size (*tmpl));
   return TRUE;
 }
 
@@ -67,7 +69,7 @@ elan_match_verify (const ElanFrame *frame, GBytes *tmpl, gboolean *matched, GErr
   if (!check (status, message, error))
     return FALSE;
   *matched = best >= ELAN_MATCH_MIN_INLIERS;
-  g_info ("verify: %d consistent matches (need %d): %s", best, ELAN_MATCH_MIN_INLIERS,
+  g_message ("verify: %d consistent matches (need %d): %s", best, ELAN_MATCH_MIN_INLIERS,
           *matched ? "match" : "no match");
   return TRUE;
 }
