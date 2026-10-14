@@ -48,7 +48,7 @@ GError *sim_run (FpiSsm *ssm);                     /* run to completion; the err
 void    sim_cancel_in (guint ms);                  /* cancel the action cancellable after ms */
 guint   sim_warnings (void);                       /* warnings logged by the driver so far */
 void    sim_end (FpiDeviceElan0c4d *device);
-/* Runs the enroll action until it completes (at most 20 s); the error it reported or NULL. */
+/* Runs the enroll action until it completes (at most 60 s); the error it reported or NULL. */
 const GError *sim_run_enroll (FpiDeviceElan0c4d *device);
 
 /* Device whose 00 09 answers are, per touch: background, the touch, an empty frame (finger lifted). */

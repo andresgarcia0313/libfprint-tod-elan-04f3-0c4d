@@ -33,7 +33,7 @@ Download the `.deb` from [Releases](../../releases/latest) and install it with a
 - **GNOME:** Settings → System → Users → Fingerprint Login.
 - **Terminal:** `fprintd-enroll`
 
-Touch the sensor about 12 times, lifting the finger and moving it slightly each time. "Finger not
+Touch the sensor about 20 times, lifting the finger and moving it slightly each time. "Finger not
 centered" means cover the whole sensor. Prints made with the old `elan` driver must be enrolled again.
 
 ## 4. Use it
@@ -66,7 +66,7 @@ centered" means cover the whole sensor. Prints made with the old `elan` driver m
   the sensor; no vendor code, firmware or keys are included. The dangerous commands `42 01` (RUNIAP)
   and `40 27` (watchdog reset) are never sent, and a test guards the sources against them.
 - Capture recalibrates and re-initializes when the sensor returns zero or saturated frames, with typed
-  errors and retries. Enroll takes 12 touches with progress and retry hints.
+  errors and retries. Enroll takes 20 touches with progress and retry hints (measured: 12 touches accept 60 % of single touches, 20 touches 76 %, with no change for other fingers).
 - Matching: SIFT keypoints plus a RANSAC check (OpenCV, like libfprint's SIGFM). The stored template
   holds keypoint positions and descriptors only, never images. Every C++ exception is caught at the C
   boundary and becomes a logged `GError`.
@@ -102,13 +102,13 @@ Es la capa de protocolo portada a C desde la referencia en Python, más un compa
 - Compila con `-Wall -Werror` y exporta `fpi_tod_shared_driver_get_type` (`nm -D` lo muestra).
 - Es un `FpDevice` (no `FpImageDevice`): el sensor es de 150x52 y bozorth no sirve.
 - `usb_discover` devuelve 100 solo si `g_usb_device_get_release()` es 0x2410; en otra revisión devuelve 0.
-- Probado contra el lector real: un enroll de 12 toques completo, sin errores ni reinicios USB. Las pruebas
+- Probado contra el lector real: un enroll completo (entonces de 12 toques), sin errores ni reinicios USB. Las pruebas
   automáticas usan un sensor simulado y texturas sintéticas, nunca huellas reales.
-- El enroll pide 12 toques, como un celular, y reporta cada uno a fprintd (KDE muestra el avance). Un toque
+- El enroll pide 20 toques, como un celular, y reporta cada uno a fprintd (KDE muestra el avance). Un toque
   con cobertura menor de 0,8 se reporta como `FP_DEVICE_RETRY_CENTER_FINGER` y uno igual al anterior (el dedo
   no se movió) como `FP_DEVICE_RETRY_REMOVE_FINGER`; ninguno de los dos cuenta. Entre toques espera a que el
   dedo se levante, sin plazo propio: termina cuando fprintd cancela.
-- Al final el enroll entrega los 12 toques al comparador, que guarda de cada uno sus puntos clave y
+- Al final el enroll entrega los 20 toques al comparador, que guarda de cada uno sus puntos clave y
   descriptores. Verify e identify capturan un dedo y lo aceptan si al menos 8 coincidencias concuerdan en una
   sola posición con algún toque guardado (`ELAN_MATCH_MIN_INLIERS`).
 - Medido en el lector real (25 toques de un dedo y 10 de otro): el otro dedo nunca pasó de 3 coincidencias;
@@ -203,7 +203,7 @@ Ejemplo: `G_MESSAGES_DEBUG=all fprintd`.
 
 Clasificador con tramas sintéticas (vacío, crestas, ceros, saturada 0x3FFE, límites); guardas;
 remedios de error; carga del módulo como lo hace el cargador TOD; y el código real del controlador contra
-un sensor simulado (apertura, recuperaciones, captura, cancelación, límites, enroll de 12 toques con
+un sensor simulado (apertura, recuperaciones, captura, cancelación, límites, enroll por toques con
 progreso, reintentos, espera de levantar y cancelación a mitad). La normalización da los mismos 7800 bytes
 que `normalized()` de numpy sobre una trama sintética. Las tramas sintéticas no contienen datos biométricos.
 El comparador se prueba con texturas sintéticas: la misma superficie desplazada se acepta, otras diez se
@@ -230,3 +230,4 @@ equipo; esos toques nunca entran al repositorio.
 | 0.2.0 | 2026-10-13 | Enroll de 12 toques con progreso, reintentos y espera de levantar; print versionado |
 | 0.3.0 | 2026-10-13 | Comparador SIFT y RANSAC con OpenCV; plantilla sin imágenes; medido en el lector real; paquete .deb y perfil PAM; README bilingüe (inglés y español) |
 | 0.3.1 | 2026-10-13 | El resultado de cada toque queda en el journal (puntaje, nunca la imagen); el paquete fija la serie de libfprint con la que se probó |
+| 0.4.0 | 2026-10-13 | El registro pide 20 toques en vez de 12: la aceptación de un toque sube de 60 % a 76 % (medido); las huellas de 12 toques siguen valiendo |

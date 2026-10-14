@@ -1,5 +1,5 @@
 project('tod-elan0c4d', 'c', 'cpp',
-  version: '0.3.1',
+  version: '0.4.0',
   license: 'LGPL-2.1-or-later',
   meson_version: '>= 1.0',
   default_options: ['c_std=gnu11', 'cpp_std=c++17', 'warning_level=1', 'werror=true'])

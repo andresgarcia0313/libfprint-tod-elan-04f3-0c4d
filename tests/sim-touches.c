@@ -1,8 +1,9 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
 /* Enroll scripts for the simulated sensor: touches in, progress out. */
 #include "sim.h"
+#include "elan0c4d-enroll.h"
 
-#define MAX_TOUCHES 16
+#define MAX_TOUCHES (ELAN_ENROLL_STAGES + 4)  /* a full enroll plus its retries */
 
 static SimImage images[MAX_TOUCHES * 3];
 

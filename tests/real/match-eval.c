@@ -1,10 +1,10 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
 /*
  * Local check of the comparator on real touches saved by huella-proto
- * (finger<N>.npy, int32 150x52). Enrolls the first 12 of <mine>, then scores
+ * (finger<N>.npy, int32 150x52). Enrolls the first <enrolled> (default 12) of <mine>, then scores
  * the rest of <mine> and every touch of <other>. Fingerprint captures are
  * personal data: they stay on the machine and never enter the repository.
- * Usage: match-eval <mine_dir> <mine_count> <other_dir> <other_count>
+ * Usage: match-eval <mine_dir> <mine_count> <other_dir> <other_count> [enrolled]
  */
 #include <stdlib.h>
 #include "elan0c4d-match.h"
@@ -12,7 +12,7 @@
 #include "elan0c4d-quality.h"
 #include "elan0c4d-sift.h"
 
-#define ENROLLED 12
+#define MAX_ENROLLED 24
 
 /* finger<n>.npy -> 8-bit image; the npy header ends with '\n' before the data. */
 static guint8 *
@@ -51,21 +51,24 @@ score (const char *dir, guint n, GBytes *tmpl)
 int
 main (int argc, char **argv)
 {
-  guint8 *views[ENROLLED];
+  guint8 *views[MAX_ENROLLED];
+  guint enrolled = argc > 5 ? CLAMP (atoi (argv[5]), 1, MAX_ENROLLED) : 12;
+  gint64 t0;
   g_autofree gchar *message = NULL;
   g_autoptr(GBytes) tmpl = NULL;
   guint mine, other, accepted = 0, impostors = 0;
 
-  if (argc != 5)
-    g_error ("usage: %s <mine_dir> <mine_count> <other_dir> <other_count>", argv[0]);
+  if (argc != 5 && argc != 6)
+    g_error ("usage: %s <mine_dir> <mine_count> <other_dir> <other_count> [enrolled]", argv[0]);
   mine = atoi (argv[2]);
   other = atoi (argv[4]);
-  for (guint i = 0; i < ENROLLED; i++)
+  for (guint i = 0; i < enrolled; i++)
     views[i] = load (argv[1], i + 1);
-  if (elan_sift_enroll ((const guint8 *const *) views, ENROLLED, ELAN_WIDTH, ELAN_HEIGHT, &tmpl, &message) != ELAN_SIFT_OK)
+  if (elan_sift_enroll ((const guint8 *const *) views, enrolled, ELAN_WIDTH, ELAN_HEIGHT, &tmpl, &message) != ELAN_SIFT_OK)
     g_error ("%s", message);
-  g_print ("template: %u touches, %zu bytes\n", ENROLLED, g_bytes_get_size (tmpl));
-  for (guint n = ENROLLED + 1; n <= mine; n++)
+  g_print ("template: %u touches, %zu bytes\n", enrolled, g_bytes_get_size (tmpl));
+  t0 = g_get_monotonic_time ();
+  for (guint n = enrolled + 1; n <= mine; n++)
     {
       gint s = score (argv[1], n, tmpl);
       accepted += s >= ELAN_MATCH_MIN_INLIERS;
@@ -77,9 +80,10 @@ main (int argc, char **argv)
       impostors += s >= ELAN_MATCH_MIN_INLIERS;
       g_print ("other %2u: %3d\n", n, s);
     }
-  g_print ("accepted %u/%u of mine, %u/%u of the other finger (need %d)\n", accepted, mine - ENROLLED,
+  g_print ("%.0f ms per comparison\n", (g_get_monotonic_time () - t0) / 1000.0 / (mine - enrolled + other));
+  g_print ("accepted %u/%u of mine, %u/%u of the other finger (need %d)\n", accepted, mine - enrolled,
            impostors, other, ELAN_MATCH_MIN_INLIERS);
-  for (guint i = 0; i < ENROLLED; i++)
+  for (guint i = 0; i < enrolled; i++)
     g_free (views[i]);
   return 0;
 }

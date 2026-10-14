@@ -51,7 +51,7 @@ wake_up (gpointer data)
 const GError *
 sim_run_enroll (FpiDeviceElan0c4d *device)
 {
-  gint64 limit = g_get_monotonic_time () + 20 * G_USEC_PER_SEC;
+  gint64 limit = g_get_monotonic_time () + 60 * G_USEC_PER_SEC;
   guint wake = g_timeout_add (100, wake_up, NULL);
 
   elan_action_enroll (FP_DEVICE (device));

@@ -53,7 +53,7 @@ foreach name : ['open', 'capture', 'limits', 'stop', 'enroll', 'lift']
   test('sim-' + name,
     executable('test-sim-' + name, 'test-sim-' + name + '.c', sim_driver,
       include_directories: inc, dependencies: test_deps),
-    env: test_env, timeout: 60)
+    env: test_env, timeout: 120)
 endforeach
 
 # nm -D must list the entry point the TOD loader looks for.

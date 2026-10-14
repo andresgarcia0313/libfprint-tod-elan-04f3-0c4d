@@ -4,7 +4,7 @@
 
 #include "elan0c4d-ops.h"
 
-#define ELAN_ENROLL_STAGES 12
+#define ELAN_ENROLL_STAGES 20
 #define ELAN_ENROLL_COVERAGE_MIN 0.8  /* a stage needs more finger than a usable frame (0.6) */
 #define ELAN_ENROLL_SIMILAR_MAX 0.9   /* correlation with the previous stage from which it is the same touch */
 #define ELAN_LIFT_POLL_MS 150         /* pause between frames while waiting for the finger to go */
