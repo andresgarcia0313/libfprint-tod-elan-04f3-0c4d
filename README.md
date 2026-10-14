@@ -57,6 +57,9 @@ centered" means cover the whole sensor. Prints made with the old `elan` driver m
 - See what happened: `journalctl -u fprintd -b`; every step is logged in the `libfprint-elan0c4d`
   domain. For full detail: `sudo systemctl edit fprintd` and add `Environment=G_MESSAGES_DEBUG=all`
   under `[Service]`.
+- Known limitation: the driver has no suspend handler yet. If the laptop suspends while the lock
+  screen is waiting for a finger, use the password once after resume (or report what the journal
+  shows: `journalctl -u fprintd -b`).
 - Uninstall: `sudo pam-auth-update --remove fprintd-elan0c4d` (if enabled) and
   `sudo apt remove libfprint-2-tod1-elan0c4d`.
 
@@ -140,6 +143,9 @@ Las huellas registradas con el driver `elan` de fábrica no sirven con este: hay
 - Ver qué pasó: `journalctl -u fprintd -b`; cada paso queda en el dominio `libfprint-elan0c4d`. Para el
   detalle completo: `sudo systemctl edit fprintd` y añadir `Environment=G_MESSAGES_DEBUG=all` en
   `[Service]`.
+- Limitación conocida: el driver todavía no maneja la suspensión. Si el equipo se suspende mientras la
+  pantalla de bloqueo espera el dedo, al volver usa la contraseña una vez (o reporta lo que muestre
+  `journalctl -u fprintd -b`).
 - La pantalla de inicio (SDDM) todavía no admite huella en KDE (bug
   [506025](https://bugs.kde.org/show_bug.cgi?id=506025), previsto en Plasma Login Manager 6.8).
 
